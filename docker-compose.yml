@@ -1,0 +1,40 @@
+﻿services:
+  # Определяем сервис "todolist.app"
+  todolist.app:
+    # Используем образ с именем "todolist.app"
+    image: todolist.app
+    # Собираем образ из указанного Dockerfile в текущем контексте
+    build:
+      context: .
+      dockerfile: ToDoList.App/Dockerfile
+    ports:
+      - "5000:5000"
+    # Устанавливаем переменные окружения для контейнера
+    environment:
+      # Устанавливаем строку подключения к базе данных
+      DATABASE_CONNECTION: "Server=postgresql.docker;Port=5432;Database=todo;User Id=todo_owner;Password=password;"
+  
+  # Определяем сервис "postgresql"
+  postgresql:
+    # Используем образ PostgreSQL версии 15
+    image: postgres:15
+    # Устанавливаем переменные окружения для PostgreSQL
+    environment:
+      # Устанавливаем имя базы данных
+      POSTGRES_DB: "todo"
+      # Устанавливаем имя пользователя базы данных
+      POSTGRES_USER: "todo_owner"
+      # Устанавливаем пароль пользователя базы данных
+      POSTGRES_PASSWORD: "password"
+      # Указываем путь к данным PostgreSQL внутри контейнера
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    # Монтируем текущий каталог внутрь контейнера PostgreSQL для сохранения данных
+    volumes:
+      - .:/var/lib/postgresql/data
+    # Открываем порт хоста для доступа к PostgreSQL извне
+    ports:
+      - "5432:5432"
+    # Перезапускаем контейнер, если он остановлен, кроме случаев, когда его явно остановили
+    restart: unless-stopped
+    # Устанавливаем имя хоста контейнера
+    hostname: "postgresql.docker"
