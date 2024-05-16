@@ -1,0 +1,19 @@
+@model ToDoList.App.Models.TodoItem
+
+<h2>Update ToDo Item</h2>
+
+<form asp-action="Update">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="form-group">
+        <label asp-for="Title" class="control-label"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="IsCompleted" class="form-check-label"></label>
+        <input asp-for="IsCompleted" class="form-check-input" />
+        <span asp-validation-for="IsCompleted" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Update</button>
+</form>
