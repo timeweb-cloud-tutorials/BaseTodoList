@@ -8,17 +8,11 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<TodoListDbContext>(options =>
     options.UseNpgsql(Environment.GetEnvironmentVariable("DATABASE_CONNECTION") ?? throw new Exception("Connection string is not defined")));
 
+builder.WebHost.UseUrls(Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? "http://localhost:5000");
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
+app.UseExceptionHandler("/Home/Error");
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
