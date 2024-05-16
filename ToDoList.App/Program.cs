@@ -8,7 +8,6 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<TodoListDbContext>(options =>
     options.UseNpgsql(Environment.GetEnvironmentVariable("DATABASE_CONNECTION") ?? throw new Exception("Connection string is not defined")));
 
-builder.WebHost.UseUrls("http://localhost:5000");
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
