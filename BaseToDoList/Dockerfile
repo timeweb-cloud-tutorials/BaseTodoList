@@ -1,52 +1,51 @@
-﻿# Устанавливаем базовый образ, содержащий ASP.NET для приложения
+﻿# Используем официальный образ ASP.NET Core 7.0 в качестве базового для нашего приложения
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 
-# Устанавливаем рабочую директорию для контейнера
+# Устанавливаем рабочую директорию внутри контейнера для приложения
 WORKDIR /app
 
-# Открываем порт 80 для веб-трафика и порт 443 для HTTPS
+# Открываем порт 80 для HTTP-трафика
 EXPOSE 80
 
-# Устанавливаем образ SDK для сборки приложения
+# Используем официальный образ .NET SDK 7.0 для сборки приложения
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 
-# Устанавливаем аргумент для конфигурации сборки, по умолчанию Release
+# Задаем аргумент для конфигурации сборки, по умолчанию это Release
 ARG BUILD_CONFIGURATION=Release
 
-# Устанавливаем рабочую директорию для сборки проекта
+# Устанавливаем рабочую директорию для исходного кода приложения
 WORKDIR /src
 
-# Копируем проект приложения в контейнер
-COPY ["ToDoList.App/ToDoList.App.csproj", "ToDoList.App/"]
+# Копируем файл проекта в контейнер для восстановления зависимостей
+COPY ["BaseToDoList/BaseToDoList.csproj", "BaseToDoList/"]
 
-# Восстанавливаем зависимости проекта
-RUN dotnet restore "ToDoList.App/ToDoList.App.csproj"
+# Восстанавливаем зависимости, указанные в файле проекта
+RUN dotnet restore "BaseToDoList/BaseToDoList.csproj"
 
-# Копируем все файлы проекта в контейнер
+# Копируем все оставшиеся файлы исходного кода в контейнер
 COPY . .
 
-# Устанавливаем рабочую директорию внутри проекта
-WORKDIR "/src/ToDoList.App"
+# Устанавливаем рабочую директорию внутри контейнера для проекта
+WORKDIR "/src/BaseToDoList"
 
-# Собираем проект в рамках указанной конфигурации и указываем путь для выходных файлов
-RUN dotnet build "ToDoList.App.csproj" -c $BUILD_CONFIGURATION -o /app/build
+# Собираем проект в конфигурации Release и выводим результат в указанную директорию
+RUN dotnet build "BaseToDoList.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# Создаем новый этап с именем publish, наследующий от предыдущего этапа сборки
+# Создаем новый этап публикации, который наследует предыдущий этап сборки
 FROM build AS publish
-
 ARG BUILD_CONFIGURATION=Release
 
-# Публикуем приложение в указанной конфигурации и указываем путь для выходных файлов
-RUN dotnet publish "ToDoList.App.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+# Публикуем приложение в конфигурации Release, указывая выходную директорию и отключая использование AppHost
+RUN dotnet publish "BaseToDoList.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Создаем последний этап с именем final, наследующий от базового образа ASP.NET
+# Создаем финальный этап на основе базового образа ASP.NET Core
 FROM base AS final
 
-# Устанавливаем рабочую директорию для приложения
+# Устанавливаем рабочую директорию внутри контейнера для опубликованного приложения
 WORKDIR /app
 
-# Копируем скомпилированное приложение из этапа publish в рабочую директорию final
+# Копируем опубликованные файлы из предыдущего этапа в рабочую директорию
 COPY --from=publish /app/publish .
 
-# Устанавливаем точку входа для контейнера
-ENTRYPOINT ["dotnet", "ToDoList.App.dll"]
+# Устанавливаем точку входа для запуска приложения в контейнере
+ENTRYPOINT ["dotnet", "BaseToDoList.dll"]
