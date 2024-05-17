@@ -2,11 +2,11 @@
   # Определяем сервис "todolist.app"
   todolist.app:
     # Используем образ с именем "todolist.app"
-    image: todolist.app
+    image: todolist
     # Собираем образ из указанного Dockerfile в текущем контексте
     build:
       context: .
-      dockerfile: ToDoList.App/Dockerfile
+      dockerfile: Dockerfile
     ports:
       - "5000:5000"
     # Устанавливаем переменные окружения для контейнера
